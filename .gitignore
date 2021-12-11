@@ -361,3 +361,15 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+Debug
+Release
+comments_deletor/Debug
+comments_deletor/Release
+comments_deletor/file42.wc
+comments_deletor/file1.wc
+comments_deletor/file2.wc
+comments_deletor/Zile1.c
+Zile1.c
+comments_deletor/Zile2.c
+comments_deletor/Zile42.c

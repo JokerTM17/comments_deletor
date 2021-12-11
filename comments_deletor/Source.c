@@ -3,7 +3,6 @@
 
 int main()
 {
-	//printf(" This is // not comment ");
 	char temp_file_name[35], temp_str[1024];
 	FILE *files_names;
 
@@ -21,7 +20,7 @@ int main()
 	
 	FILE *file_with_comments, *new_file;
 	int z;
-	short int flag_slash, flag_mlt_cmnt, flag_ct_ln_cmnt, flag_ln_cmnt,	flag_quotes, EOF_flag, flag_spec_symb_out;
+	short int flag_slash, flag_mlt_cmnt, flag_ct_ln_cmnt, flag_ln_cmnt,	flag_quotes, EOF_flag, flag_spec_symb_out, flag_ctln_quotes, flag_kavichka;
 	
 	for (int i = 0; i < number_of_f; i++)
 	{
@@ -55,6 +54,9 @@ int main()
 		flag_ln_cmnt = 0;
 		flag_quotes = 0;
 		flag_spec_symb_out = 0;
+		flag_ctln_quotes = -1;
+		flag_kavichka = 0;
+
 		new_file = fopen(temp_file_name, "w");
 		
 		char temp_c = '1';
@@ -77,11 +79,11 @@ int main()
 				else
 					flag_nll = 1;
 			}
-			
+			temp_str[k + 1] = '\0'; temp_str[k + 1] = '\0'; //seems like doesnt work
 			
 			for (int t = 0; t < k; t++)
 			{
-				if (temp_str[t] == '\"')
+				/*if (temp_str[t] == '\"')
 				{
 					if (t > 0 && temp_str[t - 1] == '\\')
 						flag_spec_symb_out = 1;
@@ -90,13 +92,13 @@ int main()
 
 					flag_spec_symb_out = 0;
 				}
-				else if (flag_quotes == 0 && t + 1 < k && temp_str[t] == '/' && temp_str[t + 1] == '/')
+				else if (flag_quotes == 0 && flag_mlt_cmnt == 0 &&  t + 1 < k && temp_str[t] == '/' && temp_str[t + 1] == '/')
 				{			
 					flag_slash = 1;
 					while(t < k && temp_str[t] == '/')
 						t += 1;	
 				}
-				else if (flag_quotes == 0 && t + 1 < k)
+				else if (flag_quotes == 0 && flag_slash == 0 && t + 1 < k)
 				{
 					if (temp_str[t] == '/' && temp_str[t + 1] == '*')
 					{
@@ -108,6 +110,44 @@ int main()
 						flag_mlt_cmnt = 0;
 						t += 2;
 					}	
+				}*/
+				
+
+				if (temp_str[t] == '\"')
+				{
+					if (flag_ctln_quotes > -1 && t > 0 && temp_str[t - 1] == '\\')
+						flag_spec_symb_out = 1;
+					if (flag_slash == 0 && flag_mlt_cmnt == 0 && flag_spec_symb_out == 0)
+						flag_quotes = (flag_quotes + 1) % 2;
+
+					flag_spec_symb_out = 0;
+				}
+				else if (temp_str[t] == '\'' && flag_quotes == 0 && flag_slash == 0 && flag_mlt_cmnt == 0)
+				{
+					if(flag_ctln_quotes == -1)
+						flag_kavichka = (flag_kavichka + 1) % 2;
+				}
+				else if (flag_kavichka == 0 && flag_quotes == 0 && flag_slash == 0 && t + 1 < k)
+				{
+					if (flag_mlt_cmnt == 0 && temp_str[t] == '/' && temp_str[t + 1] == '/')
+					{
+						flag_slash = 1;
+						while (t < k && temp_str[t] == '/')
+							t += 1;
+					}
+					else
+					{
+						if (temp_str[t] == '/' && temp_str[t + 1] == '*')
+						{
+							flag_mlt_cmnt = 1;
+
+						}
+						else if (temp_str[t] == '*' && temp_str[t + 1] == '/')
+						{
+							flag_mlt_cmnt = 0;
+							t += 2;
+						}
+					}
 				}
 				//checking for line cutting letter
 				if (flag_slash == 1 && temp_str[t] == '\\' && temp_str[t + 1]== '\n')
@@ -124,7 +164,15 @@ int main()
 					//for the case of "*/" at the end of file
 					putc('\n', new_file);
 				}
-				
+				if (flag_quotes == 1)
+				{
+					if (flag_ctln_quotes == -1 && temp_str[t] == '\\')
+						flag_ctln_quotes = t;
+					else
+					{
+						flag_ctln_quotes = -1;
+					}
+				}
 			}
 			if (flag_quotes == 0 && flag_ct_ln_cmnt == 1 && flag_slash == 1)
 				flag_ct_ln_cmnt = 0;
